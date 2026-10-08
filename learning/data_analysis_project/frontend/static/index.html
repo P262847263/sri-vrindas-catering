@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SV Data Viewer</title>
+    <style>table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:4px}</style>
+  </head>
+  <body>
+    <h1>SV Data Viewer</h1>
+    <div id="status">Loading...</div>
+    <div id="table"></div>
+
+    <script>
+      async function load() {
+        try {
+          const res = await fetch('/api/data?limit=200');
+          const json = await res.json();
+          document.getElementById('status').textContent = `Loaded ${json.count} rows`;
+          if (!json.data || json.data.length === 0) return;
+          const cols = Object.keys(json.data[0]);
+          const table = document.createElement('table');
+          const thead = document.createElement('thead');
+          const hrow = document.createElement('tr');
+          cols.forEach(c => { const th = document.createElement('th'); th.textContent = c; hrow.appendChild(th); });
+          thead.appendChild(hrow);
+          table.appendChild(thead);
+          const tbody = document.createElement('tbody');
+          json.data.forEach(row => {
+            const tr = document.createElement('tr');
+            cols.forEach(c => { const td = document.createElement('td'); td.textContent = row[c]; tr.appendChild(td); });
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          document.getElementById('table').appendChild(table);
+        } catch (err) {
+          document.getElementById('status').textContent = 'Error: ' + err.message;
+        }
+      }
+      load();
+    </script>
+  </body>
+</html>
